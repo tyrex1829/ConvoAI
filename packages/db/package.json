@@ -1,0 +1,23 @@
+{
+  "name": "@convoai/db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {
+    "./prisma": "./src/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@convoai/typescript-config": "workspace:*",
+    "prisma": "6.14.0"
+  },
+  "dependencies": {
+    "@prisma/client": "6.14.0",
+    "dotenv": "^17.2.1"
+  }
+}
