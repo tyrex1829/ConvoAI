@@ -14,19 +14,127 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
+  id              String              @id
+  name            String
+  email           String
+  emailVerified   Boolean
+  image           String?
+  createdAt       DateTime
+  updatedAt       DateTime
+
+  sessions        Session[]
+  accounts        Account[]
+
+  subscription    Subscription?
+  integrations    Integrations[]
+  automations     Automation[]
 
   @@unique([email])
   @@map("user")
 }
+
+model Subscription {
+  id              String              @id @default(cuid())
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String              @unique
+  createdAt       DateTime            @default(now())
+  plan            PLAN                @default(FREE)
+  updatedAt       DateTime            @updatedAt
+  customerId      String?
+}
+
+model Integrations {
+  id              String              @id @default(cuid())
+  name            INTEGRATION_TYPE     @default(INSTAGRAM)
+  user            User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String?
+  token           String?
+  createdAt       DateTime            @default(now())
+  expiresAt       DateTime?
+}
+
+model Automation {
+  id              String              @id @default(cuid())
+  name            String              @default("Untitled")
+  createdAt       DateTime            @default(now())
+  active          Boolean             @default(false)
+  trigger         Trigger[]
+  listener        Listener[]
+  posts           Post[]
+  dms             Dms[]
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  keywords        Keyword[]
+}
+
+model Dms {
+  id              String              @id @default(cuid())
+  automation      Automation?         @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId    String?
+  createdAt       DateTime            @default(now())
+  senderId        String?
+  receiver        String?
+  message         String?
+}
+
+model Post {
+  id              String              @id @default(cuid())
+  postId          String?
+  caption         String?
+  media           String
+  mediaType       MEDIA_TYPE          @default(IMAGE)
+  automation      Automation?         @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId    String?
+
+}
+
+model Listener {
+  id              String              @id @default(cuid())
+  automation      Automation?         @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId    String?
+  listener        LISTENERS           @default(MESSAGE)
+  prompt          String?
+  commentReply    String?
+  dmCount         Int                 @default(0)
+  commentCount    Int                 @default(0)
+}
+
+model Trigger {
+  id              String              @id @default(cuid())
+  type            String
+  automation      Automation?         @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId    String?
+}
+
+model Keyword {
+  id              String              @id @default(cuid())
+  word            String
+  automation      Automation?         @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId    String?
+
+  @@unique([word, automationId])
+}
+
+enum PLAN {
+  PRO
+  FREE
+}
+
+enum INTEGRATION_TYPE {
+  INSTAGRAM
+}
+
+enum MEDIA_TYPE {
+  IMAGE
+  VIDEO
+  CAROSEL_ALBUM
+}
+
+enum LISTENERS {
+  SMARTAI
+  MESSAGE
+}
+
 
 model Session {
   id        String   @id
