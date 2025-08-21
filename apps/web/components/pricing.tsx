@@ -1,8 +1,21 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function Pricing() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const handleGetStartedClick = () => {
+    if (session?.user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/signin");
+    }
+  };
   return (
     <section className="py-16 md:py-32 mt-20">
       <div className="mx-auto max-w-5xl px-6">
@@ -29,11 +42,12 @@ export default function Pricing() {
               </div>
 
               <Button
-                asChild
                 variant="outline"
                 className="w-full bg-transparent text-white border-white/30 hover:bg-white/30 hover:text-white"
+                onClick={handleGetStartedClick}
+                disabled={isPending}
               >
-                <Link href="">Get Started</Link>
+                {session?.user ? "Go to Dashboard" : "Get Started"}
               </Button>
 
               <hr className="border-dashed" />
@@ -65,10 +79,11 @@ export default function Pricing() {
                 </div>
 
                 <Button
-                  asChild
                   className="w-full bg-white text-black hover:bg-white/85"
+                  onClick={handleGetStartedClick}
+                  disabled={isPending}
                 >
-                  <Link href="">Get Started</Link>
+                  {session?.user ? "Go to Dashboard" : "Get Started"}
                 </Button>
               </div>
 

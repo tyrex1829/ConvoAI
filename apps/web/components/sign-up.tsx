@@ -1,20 +1,62 @@
+"use client";
+
 // import { LogoIcon } from '@/components/logo'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
+export default function SignUpPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("firstname") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("pwd") as string;
+
+    try {
+      const { data, error } = await authClient.signUp.email({
+        email,
+        password,
+        name,
+      });
+
+      if (error) {
+        setError(error.message || "An error occurred during signup");
+        return;
+      }
+
+      if (data) {
+        // Signup successful, redirect to dashboard
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      console.error("Signup error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
-        action=""
+        onSubmit={handleSubmit}
         className=" m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border border-white/30 p-0.5 shadow-md"
       >
         <div className="p-8 pb-6">
           <div>
             <h1 className=" mb-1 mt-4 text-xl font-semibold text-white">
-              Create a Tailark Account
+              Create a ConvoAI Account
             </h1>
             <p className="text-sm text-white/50">
               Welcome! Create an account to get started
@@ -81,31 +123,17 @@ export default function LoginPage() {
           <hr className="my-4 border-dashed border-white/30" />
 
           <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="firstname" className="block text-sm text-white">
-                  Firstname
-                </Label>
-                <Input
-                  type="text"
-                  required
-                  name="firstname"
-                  id="firstname"
-                  className="bg-transparent border-white/30 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastname" className="block text-sm text-white">
-                  Lastname
-                </Label>
-                <Input
-                  type="text"
-                  required
-                  name="lastname"
-                  id="lastname"
-                  className="bg-transparent border-white/30 text-white"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstname" className="block text-sm text-white">
+                Name
+              </Label>
+              <Input
+                type="text"
+                required
+                name="firstname"
+                id="firstname"
+                className="bg-transparent border-white/30 text-white"
+              />
             </div>
 
             <div className="space-y-2">
@@ -134,8 +162,16 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button className="w-full bg-white text-black hover:bg-white/80">
-              Continue
+            {error && (
+              <div className="text-red-400 text-sm text-center">{error}</div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-white text-black hover:bg-white/80"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating Account..." : "Continue"}
             </Button>
           </div>
         </div>
@@ -144,7 +180,7 @@ export default function LoginPage() {
           <p className=" text-center text-sm text-white/85">
             Have an account ?
             <Button asChild variant="link" className="px-2 text-white">
-              <Link href="#">Sign In</Link>
+              <Link href="/signin">Sign In</Link>
             </Button>
           </p>
         </div>

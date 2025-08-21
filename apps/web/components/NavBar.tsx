@@ -14,6 +14,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
@@ -23,6 +25,25 @@ const navigationLinks = [
 ];
 
 export default function NavBar() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const handleSignInClick = () => {
+    if (session?.user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/signin");
+    }
+  };
+
+  const handleSignUpClick = () => {
+    if (session?.user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/signup");
+    }
+  };
+
   return (
     <header className="border-b border-white/20 px-4 md:px-6 mt-4">
       <div className="flex h-16 items-center gap-4">
@@ -107,19 +128,21 @@ export default function NavBar() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           <Button
-            asChild
             variant="ghost"
             size="sm"
             className="text-sm text-white hover:bg-white/20 hover:text-white"
+            onClick={handleSignInClick}
+            disabled={isPending}
           >
-            <a href="#">Sign In</a>
+            {session?.user ? "Sign In" : "Sign In"}
           </Button>
           <Button
-            asChild
             size="sm"
             className="text-sm bg-white text-black hover:bg-white/85"
+            onClick={handleSignUpClick}
+            disabled={isPending}
           >
-            <a href="#">Get Started</a>
+            {session?.user ? "Dashboard" : "Get Started"}
           </Button>
         </div>
       </div>

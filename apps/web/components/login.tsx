@@ -1,20 +1,60 @@
+"use client";
+
 // import { LogoIcon } from '@/components/logo'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("pwd") as string;
+
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message || "An error occurred during signin");
+        return;
+      }
+
+      if (data) {
+        // Signin successful, redirect to dashboard
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      console.error("Signin error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <section className="flex min-h-screen  px-4 py-16 md:py-32 bg-transparent">
       <form
-        action=""
+        onSubmit={handleSubmit}
         className=" m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border border-white/30 p-0.5 shadow-md "
       >
         <div className="p-8 pb-6">
           <div>
             <h1 className="mb-1 mt-4 text-xl font-semibold text-white">
-              Sign In to Tailark
+              Sign In to ConvoAI
             </h1>
             <p className="text-sm text-white/50">
               Welcome back! Sign in to continue
@@ -117,17 +157,25 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button className="w-full bg-white text-black hover:bg-white/80">
-              Sign In
+            {error && (
+              <div className="text-red-400 text-sm text-center">{error}</div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-white text-black hover:bg-white/80"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </div>
         </div>
 
         <div className=" border p-3 bg-white/10 border-white/10 rounded-lg">
           <p className=" text-center text-sm text-white/85">
-            Don't have an account ?
+            Don&apos;t have an account ?
             <Button asChild variant="link" className="px-2 text-white">
-              <Link href="#">Create account</Link>
+              <Link href="/signup">Create account</Link>
             </Button>
           </p>
         </div>

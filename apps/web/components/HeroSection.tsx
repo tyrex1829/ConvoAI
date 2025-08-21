@@ -1,8 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function HeroSection() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const handleStartClick = () => {
+    if (session?.user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/signin");
+    }
+  };
   return (
     <main className="overflow-hidden mt-10">
       <section className="relative">
@@ -41,13 +55,14 @@ export default function HeroSection() {
               <div className="mt-12">
                 <Button
                   size="lg"
-                  asChild
                   className="bg-white text-black hover:bg-white/80"
+                  onClick={handleStartClick}
+                  disabled={isPending}
                 >
-                  <Link href="#">
-                    <Rocket className="relative size-4" />
-                    <span className="text-nowrap ">Start For Free</span>
-                  </Link>
+                  <Rocket className="relative size-4" />
+                  <span className="text-nowrap">
+                    {session?.user ? "Go to Dashboard" : "Start For Free"}
+                  </span>
                 </Button>
               </div>
             </div>
