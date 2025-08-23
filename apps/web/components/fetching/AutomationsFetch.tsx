@@ -201,13 +201,45 @@ export default function AutomationsFetch({ session }: AutomationsFetchProps) {
         </div>
       )}
 
+      {/* Create New Automation Button */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={handleCreateAutomation}
+          disabled={isCreatingAutomation}
+          className="px-6 py-2 bg-white border rounded-lg hover:bg-white/85 text-black font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {isCreatingAutomation && (
+            <svg
+              className="w-4 h-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          )}
+          {isCreatingAutomation ? "Creating..." : "Create New"}
+        </button>
+      </div>
+
       {automations.map((automation) => (
         <div
           key={automation.id}
           className="flex items-center justify-between p-4  rounded-lg border border-white/20 transition-colors"
         >
           <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-2">
+            <div className="flex items-center space-x-3 mb-5">
               <h4 className="text-white font-medium">{automation.name}</h4>
               <span
                 className={`px-2 py-1 rounded-full text-xs ${
@@ -220,49 +252,51 @@ export default function AutomationsFetch({ session }: AutomationsFetchProps) {
               </span>
             </div>
 
-            {automation.keywords.length > 0 && (
-              <div className="mb-2">
-                <p className="text-white/60 text-sm mb-1">Keywords:</p>
-                <div className="flex flex-wrap gap-1">
-                  {automation.keywords.map((keyword) => (
-                    <span
-                      key={keyword.id}
-                      className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs"
-                    >
-                      {keyword.word}
-                    </span>
-                  ))}
+            <div className="flex gap-24 items-center">
+              {automation.keywords.length > 0 && (
+                <div className="mb-2 flex gap-3 items-center">
+                  <p className="text-white/60 text-sm mb-1">Keywords:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {automation.keywords.map((keyword) => (
+                      <span
+                        key={keyword.id}
+                        className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs h-7"
+                      >
+                        {keyword.word}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {automation.listener.length > 0 && (
-              <div>
-                <p className="text-white/60 text-sm mb-1">Listeners:</p>
-                <div className="space-y-1">
-                  {automation.listener.map((listener) => (
-                    <div key={listener.id} className="text-white/60 text-sm">
-                      <span className="font-medium">{listener.listener}</span>
-                      {listener.prompt && (
-                        <span className="ml-2 text-white/40">
-                          - {listener.prompt}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+              {automation.listener.length > 0 && (
+                <div className="flex gap-3 items-center">
+                  <p className="text-white/60 text-sm">Listeners:</p>
+                  <div className="space-y-1">
+                    {automation.listener.map((listener) => (
+                      <div key={listener.id} className="text-white/60 text-sm">
+                        <span className="font-medium">{listener.listener}</span>
+                        {listener.prompt && (
+                          <span className="ml-2 text-white/40">
+                            - {listener.prompt}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <p className="text-white/40 text-xs mt-2">
-              Created: {new Date(automation.createdAt).toLocaleDateString()}
-            </p>
+              <p className="text-white/40 text-xs">
+                Created: {new Date(automation.createdAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center space-x-3 ml-4">
             <button
               onClick={() => handleConfigureAutomation(automation.id)}
-              className="text-white/70 hover:text-white text-sm font-medium transition-colors"
+              className="text-white/80 hover:text-white border border-white/20 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
             >
               Configure
             </button>
