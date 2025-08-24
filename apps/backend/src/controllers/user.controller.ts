@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "@convoai/db/prisma";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export const getUserData = async (
   req: Request,
@@ -279,6 +282,85 @@ export const updateAutomation = async (
     return;
   } catch (error) {
     console.error("Error updating automation:", error);
+    res.status(500).json({ error: "Internal server error", details: error });
+    return;
+  }
+};
+
+export const updateSubscription = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const user = req.user;
+    const { session_id } = req.body;
+
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    if (!session_id) {
+      res.status(400).json({ error: "Session ID is required" });
+      return;
+    }
+
+    // Retrieve the Stripe session to get customer details
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    if (!session) {
+      res.status(404).json({ error: "Stripe session not found" });
+      return;
+    }
+
+    // Verify that the session metadata contains the correct user ID
+    if (session.metadata?.userId !== user.id) {
+      res.status(403).json({ error: "Session does not belong to this user" });
+      return;
+    }
+
+    const customerId = session.customer as string;
+
+    if (!customerId) {
+      res.status(400).json({ error: "Customer ID not found in session" });
+      return;
+    }
+
+    // Check if user already has a subscription
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { userId: user.id },
+    });
+
+    let subscription;
+
+    if (existingSubscription) {
+      // Update existing subscription
+      subscription = await prisma.subscription.update({
+        where: { userId: user.id },
+        data: {
+          plan: "PRO",
+          customerId: customerId,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new subscription
+      subscription = await prisma.subscription.create({
+        data: {
+          userId: user.id,
+          plan: "PRO",
+          customerId: customerId,
+        },
+      });
+    }
+
+    res.status(200).json({
+      message: "Subscription updated successfully",
+      subscription: subscription,
+    });
+    return;
+  } catch (error) {
+    console.error("Error updating subscription:", error);
     res.status(500).json({ error: "Internal server error", details: error });
     return;
   }

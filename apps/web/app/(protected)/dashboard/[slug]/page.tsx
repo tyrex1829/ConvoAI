@@ -24,6 +24,13 @@ interface Automation {
   }>;
 }
 
+interface Post {
+  id: string;
+  caption: string;
+  media: string;
+  mediaType: string;
+}
+
 export default function AutomationDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -40,9 +47,13 @@ export default function AutomationDetailPage() {
   const [listenerMessage, setListenerMessage] = useState("");
   const [listenerPrompt, setListenerPrompt] = useState("");
   const [isCreatingListener, setIsCreatingListener] = useState(false);
+  const [showPostsDropdown, setShowPostsDropdown] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listenerDropdownRef = useRef<HTMLDivElement>(null);
+  const postsDropdownRef = useRef<HTMLDivElement>(null);
 
   const automationId = params.slug as string;
 
@@ -90,6 +101,28 @@ export default function AutomationDetailPage() {
     fetchAutomationDetail();
   }, [automationId]);
 
+  // Fetch posts when posts dropdown is opened
+  useEffect(() => {
+    if (showPostsDropdown && posts.length === 0) {
+      const fetchPosts = async () => {
+        try {
+          setLoadingPosts(true);
+          const { data } = await api.get(`/user/automation/${automationId}`);
+
+          if (data.posts) {
+            setPosts(data.posts);
+          }
+        } catch (error) {
+          console.error("Error fetching posts:", error);
+        } finally {
+          setLoadingPosts(false);
+        }
+      };
+
+      fetchPosts();
+    }
+  }, [showPostsDropdown, automationId, posts.length]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -104,6 +137,12 @@ export default function AutomationDetailPage() {
         !listenerDropdownRef.current.contains(event.target as Node)
       ) {
         setShowListenerDropdown(false);
+      }
+      if (
+        postsDropdownRef.current &&
+        !postsDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowPostsDropdown(false);
       }
     };
 
@@ -752,9 +791,84 @@ export default function AutomationDetailPage() {
                 </div>
               )}
               {automation.listener.length > 0 && (
-                <button className="px-4 py-2 bg-transparent mt-4 hover:bg-white/20 border border-white/20 rounded-lg text-white font-medium transition-colors">
-                  Connect
-                </button>
+                <div ref={postsDropdownRef} className="relative mt-4">
+                  <button
+                    onClick={() => setShowPostsDropdown(!showPostsDropdown)}
+                    className="px-4 py-2 bg-transparent hover:bg-white/20 border border-white/20 rounded-lg text-white font-medium transition-colors"
+                  >
+                    Add post
+                  </button>
+
+                  {showPostsDropdown && (
+                    <div className="absolute top-full mt-2 left-0 w-96 bg-gray-800 rounded-lg border border-gray-600 shadow-xl z-10 max-h-96 overflow-y-auto">
+                      <div className="p-4">
+                        <h4 className="text-white font-medium mb-3">
+                          Select a Post
+                        </h4>
+
+                        {loadingPosts ? (
+                          <div className="text-center py-4">
+                            <div className="text-white/60">
+                              Loading posts...
+                            </div>
+                          </div>
+                        ) : posts.length > 0 ? (
+                          <div className="space-y-3">
+                            {posts.map((post) => (
+                              <div
+                                key={post.id}
+                                className="p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 cursor-pointer transition-colors"
+                                onClick={() => {
+                                  // Handle post selection here
+                                  console.log("Selected post:", post);
+                                  setShowPostsDropdown(false);
+                                }}
+                              >
+                                <div className="flex items-start space-x-3">
+                                  {post.mediaType === "IMAGE" && (
+                                    <img
+                                      src={post.media}
+                                      alt="Post media"
+                                      className="w-12 h-12 object-cover rounded"
+                                    />
+                                  )}
+                                  {post.mediaType === "VIDEO" && (
+                                    <div className="w-12 h-12 bg-gray-600 rounded flex items-center justify-center">
+                                      <svg
+                                        className="w-6 h-6 text-white"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M8 5v14l11-7z" />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white text-sm font-medium truncate">
+                                      {post.caption || "No caption"}
+                                    </p>
+                                    <p className="text-white/60 text-xs mt-1">
+                                      {post.mediaType}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <div className="text-white/60 mb-2">
+                              No posts available
+                            </div>
+                            <div className="text-white/40 text-sm">
+                              Connect your Instagram account to see posts
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

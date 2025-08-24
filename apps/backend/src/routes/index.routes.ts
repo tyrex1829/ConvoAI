@@ -7,6 +7,7 @@ import {
   updateInstaToken,
   getAutomationById,
   updateAutomation,
+  updateSubscription,
 } from "../controllers/user.controller";
 
 export const indexRouter: Router = Router();
@@ -17,3 +18,4 @@ indexRouter.patch("/initialize-automation", verifyUser, enableAutomation);
 indexRouter.get("/automation", verifyUser, getAutomation);
 indexRouter.get("/automation/:id", verifyUser, getAutomationById);
 indexRouter.patch("/automation/:id", verifyUser, updateAutomation);
+indexRouter.post("/subscription", verifyUser, updateSubscription);

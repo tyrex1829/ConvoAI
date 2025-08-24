@@ -134,53 +134,6 @@ const SettingsContent = ({ session }: { session: any }) => (
         </button>
       </div>
     </div>
-
-    {/* Notification Settings */}
-    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-      <h3 className="text-xl font-semibold mb-4">Notifications</h3>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-white font-medium">Email Notifications</h4>
-            <p className="text-white/60 text-sm">
-              Receive email alerts for new messages
-            </p>
-          </div>
-          <button className="w-12 h-6 bg-blue-600 rounded-full relative">
-            <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-          </button>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-white font-medium">Push Notifications</h4>
-            <p className="text-white/60 text-sm">
-              Receive push notifications on your device
-            </p>
-          </div>
-          <button className="w-12 h-6 bg-white/30 rounded-full relative">
-            <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5"></div>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    {/* Danger Zone */}
-    <div className="bg-red-500/10 rounded-lg p-6 border border-red-500/20">
-      <h3 className="text-xl font-semibold mb-4 text-red-400">Danger Zone</h3>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-white font-medium">Delete Account</h4>
-            <p className="text-white/60 text-sm">
-              Permanently delete your account and all data
-            </p>
-          </div>
-          <button className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors">
-            Delete Account
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 );
 
